@@ -1,0 +1,105 @@
+//LoLCha.h
+#pragma once
+#include <fstream>
+using namespace std;
+class LoL {
+public:
+	LoL() {}
+	LoL(int n, int nn, float A, float B, float X, 
+		float DX, int M, char* name);
+	~LoL();
+	int N1, N2, m;
+	float a, b, x0, dx;
+	int* f1d;
+	float* f2d;
+	void f0(ofstream&);
+	void f1();
+	void f2();
+};
+
+//wk11s1.cpp
+#include <fstream>
+#include <iostream>
+#include "LoLCha.h"
+using namespace std;
+int main() {
+	LoL akali(5, 10, 2., 3., -5., 0.1, 10, (char*)"akali.dat");
+	LoL amumu(7, 100, -3.5, 4., 100., 10., 15, (char*)"amumu.dat");
+	LoL annie(12, 17, 0.01, 0.2, 1.5, 0.08, 20, (char*)"annie.dat");
+	LoL ashe(10, 20, 4.2, -5.3, 2.1, 0.2, 5, (char*)"ashe.dat");
+
+	ifstream xx("ashe.dat", ios::binary | ios::in);
+	int aa, bb, gg;
+	float cc, dd, ee, ff;
+	int z[100];
+	float c[100];
+	xx.read((char*)&aa, sizeof(int));
+	xx.read((char*)&bb, sizeof(int));
+	xx.read((char*)&cc, sizeof(float));
+	xx.read((char*)&dd, sizeof(float));
+	xx.read((char*)&ee, sizeof(float));
+	xx.read((char*)&ff, sizeof(float));
+	xx.read((char*)&gg, sizeof(int));
+	xx.read((char*)z, sizeof(int) * (bb - aa + 1));
+	xx.read((char*)c, sizeof(float) * gg);
+
+	cout << aa << " " << bb << " " << cc << " " << dd 
+		<< " " << ee << " " << ff << " " << gg << " " << endl;
+	for (int i = 0; i < (bb - aa + 1); i++) {
+		cout << z[i] << " ";
+	}
+	cout << endl;
+	for (int i = 0; i < gg; i++) {
+		cout << c[i] << " ";
+	}
+	cout << endl;
+	xx.close();
+
+	return 2;
+}
+
+//LoLCha.cpp
+#include "LoLCha.h"
+LoL::LoL(int n, int nn, float A, float B, float X, float DX, int M, char* name) {
+	N1 = n;
+	N2 = nn;
+	m = M;
+	a = A;
+	b = B;
+	x0 = X;
+	dx = DX;
+	f1d = new int[N2 - N1 + 1];
+	f2d = new float[m];
+	f1();
+	f2();
+	ofstream dd(name, ios::binary | ios::out);
+	f0(dd);
+	dd.close();
+}
+LoL::~LoL() {
+	delete f1d;
+	delete f2d;
+}
+void LoL::f0(ofstream& dd) {
+	dd.write((char*)&N1, sizeof(int));
+	dd.write((char*)&N2, sizeof(int));
+	dd.write((char*)&a, sizeof(float));
+	dd.write((char*)&b, sizeof(float));
+	dd.write((char*)&x0, sizeof(float));
+	dd.write((char*)&dx, sizeof(float));
+	dd.write((char*)&m, sizeof(int));
+	dd.write((char*)f1d, sizeof(int) * (N2 - N1 + 1));
+	dd.write((char*)f2d, sizeof(float) * m);
+}
+void LoL::f1() {
+	for (int i = N1; i <= N2; i++) {
+		f1d[i - N1] = i * (i + 1) / 2;
+	}
+}
+void LoL::f2() {
+	float x;
+	x = x0;
+	for (int i = 0; i < m; i++, x += dx) {
+		f2d[i] = a * x + b;
+	}
+}
